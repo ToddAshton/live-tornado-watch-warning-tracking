@@ -103,7 +103,7 @@ const map = L.map('map').setView([39.8283, -98.5795], 5); // Center of USA
           });
           shape.bindPopup(`
             <b>${headline}</b><br>
-            Temp: ${weather.temp || 'N/A'}&deg;C<br>Humidity: ${weather.humidity || 'N/A'}%<br>Pressure: ${weather.pressure || 'N/A'} hPa<br>
+            Temp: ${weather.temp_c || 'N/A'}&deg;C<br>Humidity: ${weather.humidity || 'N/A'}%<br>Pressure: ${weather.pressure_mb || 'N/A'} hPa<br>
             <a href='https://www.youtube.com/results?search_query=${encodeURIComponent(alert.properties.areaDesc + ' tornado')}' target='_blank'>Tornado Video Search</a>`);
           shape.addTo(warningLayer);
         }
