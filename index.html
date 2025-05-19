@@ -65,14 +65,15 @@
           watchLayer.addLayer(marker);
 
         } else if (event === 'Tornado Warning') {
-          const shape = L.polygon(coords, {
-            color: 'yellow',
-            weight: 2,
-            dashArray: '4, 4',
-            fill: false
-          });
-          shape.bindPopup(`<b>${alert.properties.headline}</b><br><a href='https://www.youtube.com/results?search_query=${encodeURIComponent(alert.properties.areaDesc + ' tornado')}' target='_blank'>Tornado Video Search</a>`);
-          warningLayer.addLayer(shape);
+  const radiusInMeters = 20000; // Approx. 20km radius
+  const shape = L.circle([centerLat, centerLng], {
+    radius: radiusInMeters,
+    color: 'red',
+    fillColor: 'red',
+    fillOpacity: 0.4
+  });
+  shape.bindPopup(`<b>${alert.properties.headline}</b><br><a href='https://www.youtube.com/results?search_query=${encodeURIComponent(alert.properties.areaDesc + ' tornado')}' target='_blank'>Tornado Video Search</a>`);
+  warningLayer.addLayer(shape);
 
         } else if (event.toLowerCase().includes('hail')) {
           const headline = alert.properties.headline;
