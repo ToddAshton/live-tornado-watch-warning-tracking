@@ -70,9 +70,18 @@ const map = L.map('map').setView([39.8283, -98.5795], 5); // Center of USA
 
         if (!geometry) return;
 
-        const coords = geometry.coordinates[0].map(c => [c[1], c[0]]);
-        const centerLat = coords.reduce((sum, pt) => sum + pt[0], 0) / coords.length;
-        const centerLng = coords.reduce((sum, pt) => sum + pt[1], 0) / coords.length;
+        let centerLat, centerLng;
+        let coords = [];
+        if (geometry.type === 'Polygon') {
+          coords = geometry.coordinates[0].map(c => [c[1], c[0]]);
+          centerLat = coords.reduce((sum, pt) => sum + pt[0], 0) / coords.length;
+          centerLng = coords.reduce((sum, pt) => sum + pt[1], 0) / coords.length;
+        } else if (geometry.type === 'Point') {
+          centerLat = geometry.coordinates[1];
+          centerLng = geometry.coordinates[0];
+        } else {
+          return;
+        }
 
         const headline = alert.properties.headline;
         const hasVideoLink = alert.properties.areaDesc && alert.properties.areaDesc.toLowerCase().includes('tornado');
