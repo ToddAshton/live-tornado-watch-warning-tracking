@@ -4,95 +4,70 @@
   <title>Live Tornado Watch/Warning Tracking</title>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" href="https://cdn-icons-png.flaticon.com/512/869/869869.png" type="image/png">
   <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
   <style>
     body, html { margin: 0; padding: 0; height: 100%; }
-    #login { display: flex; justify-content: center; align-items: center; height: 100%; }
-    #loginBox { padding: 20px; border: 1px solid #ccc; background: #f9f9f9; border-radius: 8px; }
-    #map { display: none; height: 100vh; }
-    .error { color: red; margin-top: 10px; }
+    #map { height: 100vh; }
   </style>
 </head>
 <body>
-  <div id="login">
-    <div id="loginBox">
-      <h2>Login to Access Map</h2>
-      <input type="text" id="username" placeholder="Username"><br><br>
-      <input type="password" id="password" placeholder="Password"><br><br>
-      <button onclick="checkLogin()">Login</button>
-      <div class="error" id="errorMsg"></div>
-    </div>
-  </div>
-
   <div id="map"></div>
 
   <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
   <script>
-    function checkLogin() {
-      const username = document.getElementById('username').value;
-      const password = document.getElementById('password').value;
-      const errorMsg = document.getElementById('errorMsg');
+    const map = L.map('map').setView([39.8283, -98.5795], 5); // Center of USA
 
-      if (username === 'trw' && password === 'Jesus is the answer') {
-        document.getElementById('login').style.display = 'none';
-        document.getElementById('map').style.display = 'block';
-        loadMap();
-      } else {
-        errorMsg.textContent = 'Incorrect username or password';
-      }
-    }
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 18,
+      attribution: '&copy; OpenStreetMap contributors'
+    }).addTo(map);
 
-    function loadMap() {
-      const map = L.map('map').setView([39.8283, -98.5795], 5);
+    const tornadoIcon = L.icon({
+      iconUrl: 'https://cdn-icons-png.flaticon.com/512/869/869869.png',
+      iconSize: [32, 32],
+      iconAnchor: [16, 32],
+    });
 
-      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        maxZoom: 18,
-        attribution: '&copy; OpenStreetMap contributors'
-      }).addTo(map);
+    let watchLayer = L.layerGroup().addTo(map);
+    let warningLayer = L.layerGroup().addTo(map);
 
-      const tornadoIcon = L.icon({
-        iconUrl: 'https://cdn-icons-png.flaticon.com/512/869/869869.png',
-        iconSize: [32, 32],
-        iconAnchor: [16, 32],
+    async function fetchTornadoData() {
+      watchLayer.clearLayers();
+      warningLayer.clearLayers();
+
+      const response = await fetch('https://api.weather.gov/alerts/active');
+      const data = await response.json();
+
+      data.features.forEach(alert => {
+        const event = alert.properties.event;
+        const geometry = alert.geometry;
+
+        if (!geometry) return;
+
+        const coords = geometry.coordinates[0].map(c => [c[1], c[0]]);
+
+        if (event === 'Tornado Watch') {
+          L.polygon(coords, { color: 'yellow', fillOpacity: 0.4 }).addTo(watchLayer);
+
+        } else if (event === 'Tornado Warning') {
+          const centerLat = coords.reduce((sum, pt) => sum + pt[0], 0) / coords.length;
+          const centerLng = coords.reduce((sum, pt) => sum + pt[1], 0) / coords.length;
+
+          // Embed real-time video search for storm footage
+          const query = encodeURIComponent(alert.properties.areaDesc + ' tornado');
+          const mediaSearchUrl = `https://www.youtube.com/results?search_query=${query}`;
+          const headline = alert.properties.headline;
+
+          L.marker([centerLat, centerLng], { icon: tornadoIcon })
+            .bindPopup(`<b>${headline}</b><br><a href='${mediaSearchUrl}' target='_blank'>Watch Storm Chaser Video</a>`) 
+            .addTo(warningLayer);
+        }
       });
-
-      let watchLayer = L.layerGroup().addTo(map);
-      let warningLayer = L.layerGroup().addTo(map);
-
-      async function fetchTornadoData() {
-        watchLayer.clearLayers();
-        warningLayer.clearLayers();
-
-        const response = await fetch('https://api.weather.gov/alerts/active');
-        const data = await response.json();
-
-        data.features.forEach(alert => {
-          const event = alert.properties.event;
-          const geometry = alert.geometry;
-
-          if (!geometry) return;
-
-          const coords = geometry.coordinates[0].map(c => [c[1], c[0]]);
-
-          if (event === 'Tornado Watch') {
-            L.polygon(coords, { color: 'yellow', fillOpacity: 0.4 }).addTo(watchLayer);
-          } else if (event === 'Tornado Warning') {
-            const centerLat = coords.reduce((sum, pt) => sum + pt[0], 0) / coords.length;
-            const centerLng = coords.reduce((sum, pt) => sum + pt[1], 0) / coords.length;
-
-            const placeholderMedia = 'https://www.youtube.com/results?search_query=current+tornado';
-            const headline = alert.properties.headline;
-
-            L.marker([centerLat, centerLng], { icon: tornadoIcon })
-              .bindPopup(`<b>${headline}</b><br><a href='${placeholderMedia}' target='_blank'>View Photo/Video</a>`)
-              .addTo(warningLayer);
-          }
-        });
-      }
-
-      fetchTornadoData();
-      setInterval(fetchTornadoData, 60000);
     }
+
+    fetchTornadoData();
+    setInterval(fetchTornadoData, 60000); // Refresh every 60 seconds
   </script>
 </body>
 </html>
