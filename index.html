@@ -59,19 +59,42 @@
         const centerLat = coords.reduce((sum, pt) => sum + pt[0], 0) / coords.length;
         const centerLng = coords.reduce((sum, pt) => sum + pt[1], 0) / coords.length;
 
+        const headline = alert.properties.headline;
+        const hasVideoLink = alert.properties.areaDesc && alert.properties.areaDesc.toLowerCase().includes('tornado');
+
         if (event === 'Tornado Watch') {
           const marker = L.marker([centerLat, centerLng], { icon: tornadoIcon })
-            .bindPopup(`<b>${alert.properties.headline}</b>`);
+            .bindPopup(`<b>${headline}</b>`);
           watchLayer.addLayer(marker);
 
         } else if (event === 'Tornado Warning') {
-  const radiusInMeters = 20000; // Approx. 20km radius
-  const shape = L.circle([centerLat, centerLng], {
-    radius: radiusInMeters,
-    color: 'red',
-    fillColor: 'red',
-    fillOpacity: 0.4
-  });
+          const radiusInMeters = 20000; // Approx. 20km radius
+          const shape = L.circle([centerLat, centerLng], {
+            radius: radiusInMeters,
+            color: 'red',
+            fillColor: 'red',
+            fillOpacity: 0.4
+          });
+          shape.bindPopup(`<b>${headline}</b><br><a href='https://www.youtube.com/results?search_query=${encodeURIComponent(alert.properties.areaDesc + ' tornado')}' target='_blank'>Tornado Video Search</a>`);
+          warningLayer.addLayer(shape);
+
+        } else if (event.toLowerCase().includes('hail')) {
+          L.marker([centerLat, centerLng], { icon: hailIcon })
+            .bindPopup(`<b>${headline}</b>`) 
+            .addTo(hailLayer);
+        }
+
+        if (hasVideoLink) {
+          const redDot = L.circleMarker([centerLat, centerLng], {
+            radius: 6,
+            color: 'red',
+            fillColor: 'red',
+            fillOpacity: 1
+          });
+          redDot.bindPopup(`<b>${headline}</b><br><a href='https://www.youtube.com/results?search_query=${encodeURIComponent(alert.properties.areaDesc + ' tornado')}' target='_blank'>Tornado Video Search</a>`);
+          redDot.addTo(map);
+        }
+      });
   shape.bindPopup(`<b>${alert.properties.headline}</b><br><a href='https://www.youtube.com/results?search_query=${encodeURIComponent(alert.properties.areaDesc + ' tornado')}' target='_blank'>Tornado Video Search</a>`);
   warningLayer.addLayer(shape);
 
