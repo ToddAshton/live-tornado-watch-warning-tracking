@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Live Tornado Watch/Warning Tracking</title>
+  <title>Active Tornado Watch/Warning with Hail Reports</title>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="icon" href="https://cdn-icons-png.flaticon.com/512/616/616655.png" type="image/png">
@@ -70,7 +70,7 @@
           const headline = alert.properties.headline;
 
           L.marker([centerLat, centerLng], { icon: tornadoIcon })
-            .bindPopup(`<b>${headline}</b><br><a href='${mediaSearchUrl}' target='_blank'>Watch Storm Chaser Video</a>`)
+            .bindPopup(`<b>${headline}</b><br><a href='${mediaSearchUrl}' target='_blank'>Tornado Video Search</a>`)
             .addTo(warningLayer);
 
         } else if (event.toLowerCase().includes('hail')) {
