@@ -15,7 +15,8 @@
   <div id="map"></div>
 
   <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
-  async function fetchCurrentWeather(lat, lon) {
+  <script>
+  async function fetchCurrentWeather(lat, lon) {
   const url = `https://weather-api183.p.rapidapi.com/weather?lat=${lat}&lon=${lon}`;
   const response = await fetch(url, {
     method: 'GET',
