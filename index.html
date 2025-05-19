@@ -36,7 +36,9 @@
     });
 
     let watchLayer = L.layerGroup().addTo(map);
-    let warningLayer = L.layerGroup().addTo(map);
+    let warningLayer = L.geoJSON(null, {
+      style: { color: 'yellow', weight: 2, dashArray: '4, 4', fill: false }
+    }).addTo(map);
     let hailLayer = L.layerGroup().addTo(map);
 
     async function fetchTornadoData() {
@@ -63,15 +65,14 @@
           watchLayer.addLayer(marker);
 
         } else if (event === 'Tornado Warning') {
-          const polygon = L.polygon(coords, {
+          const shape = L.polygon(coords, {
             color: 'yellow',
             weight: 2,
-            dashArray: '5, 5',
-            fillColor: 'yellow',
-            fillOpacity: 0.2
+            dashArray: '4, 4',
+            fill: false
           });
-          polygon.bindPopup(`<b>${alert.properties.headline}</b><br><a href='https://www.youtube.com/results?search_query=${encodeURIComponent(alert.properties.areaDesc + ' tornado')}' target='_blank'>Tornado Video Search</a>`);
-          warningLayer.addLayer(polygon);
+          shape.bindPopup(`<b>${alert.properties.headline}</b><br><a href='https://www.youtube.com/results?search_query=${encodeURIComponent(alert.properties.areaDesc + ' tornado')}' target='_blank'>Tornado Video Search</a>`);
+          warningLayer.addLayer(shape);
 
         } else if (event.toLowerCase().includes('hail')) {
           const headline = alert.properties.headline;
