@@ -41,7 +41,20 @@
     }).addTo(map);
     let hailLayer = L.layerGroup().addTo(map);
 
-    async function fetchTornadoData() {
+    async function fetchCurrentWeather(lat, lon) {
+  const url = `https://weatherapi-com.p.rapidapi.com/current.json?q=${lat},${lon}`;
+  const response = await fetch(url, {
+    method: 'GET',
+    headers: {
+      'x-rapidapi-host': 'weatherapi-com.p.rapidapi.com',
+      'x-rapidapi-key': 'YOUR_RAPIDAPI_KEY'
+    }
+  });
+  const data = await response.json();
+  return data.current;
+}
+
+async function fetchTornadoData() {
       watchLayer.clearLayers();
       warningLayer.clearLayers();
       hailLayer.clearLayers();
@@ -69,13 +82,20 @@
 
         } else if (event === 'Tornado Warning') {
           const radiusInMeters = 20000; // Approx. 20km radius
+          const weather = await fetchCurrentWeather(centerLat, centerLng);
           const shape = L.circle([centerLat, centerLng], {
             radius: radiusInMeters,
             color: 'red',
             fillColor: 'red',
             fillOpacity: 0.4
           });
-          shape.bindPopup(`<b>${headline}</b><br><a href='https://www.youtube.com/results?search_query=${encodeURIComponent(alert.properties.areaDesc + ' tornado')}' target='_blank'>Tornado Video Search</a>`);
+          shape.bindPopup(`
+            <b>${headline}</b><br>
+            Temp: ${weather.temp_c}&deg;C<br>
+            Wind: ${weather.wind_kph} kph<br>
+            Condition: ${weather.condition.text}<br>
+            <a href='https://www.youtube.com/results?search_query=${encodeURIComponent(alert.properties.areaDesc + ' tornado')}' target='_blank'>Tornado Video Search</a>
+          `);
           warningLayer.addLayer(shape);
 
         } else if (event.toLowerCase().includes('hail')) {
