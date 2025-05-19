@@ -7,12 +7,6 @@ A browser-based map application that displays live tornado warnings and watches 
 - 🌀 Tornado warnings with clickable icons
 - 🟡 Tornado watches displayed as yellow polygons
 - 🔁 Auto-refreshes every 60 seconds
-- 🔐 Login required to access the map
-
-## Login
-
-- **Username**: `trw`
-- **Password**: `Jesus is the answer`
 
 ## How to Use
 
