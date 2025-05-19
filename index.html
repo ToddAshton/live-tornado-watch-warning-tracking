@@ -35,9 +35,7 @@
       iconAnchor: [16, 32],
     });
 
-    let watchLayer = L.geoJSON(null, {
-      style: { color: 'yellow', fillOpacity: 0.4 }
-    }).addTo(map);
+    let watchLayer = L.layerGroup().addTo(map);
     let warningLayer = L.layerGroup().addTo(map);
     let hailLayer = L.layerGroup().addTo(map);
 
@@ -56,31 +54,30 @@
         if (!geometry) return;
 
         const coords = geometry.coordinates[0].map(c => [c[1], c[0]]);
+        const centerLat = coords.reduce((sum, pt) => sum + pt[0], 0) / coords.length;
+        const centerLng = coords.reduce((sum, pt) => sum + pt[1], 0) / coords.length;
 
         if (event === 'Tornado Watch') {
-          const polygon = L.polygon(coords, { color: 'yellow', fillOpacity: 0.4 });
-          watchLayer.addLayer(polygon);
+          const marker = L.marker([centerLat, centerLng], { icon: tornadoIcon })
+            .bindPopup(`<b>${alert.properties.headline}</b>`);
+          watchLayer.addLayer(marker);
 
         } else if (event === 'Tornado Warning') {
-          const centerLat = coords.reduce((sum, pt) => sum + pt[0], 0) / coords.length;
-          const centerLng = coords.reduce((sum, pt) => sum + pt[1], 0) / coords.length;
-
-          const query = encodeURIComponent(alert.properties.areaDesc + ' tornado');
-          const mediaSearchUrl = `https://www.youtube.com/results?search_query=${query}`;
-          const headline = alert.properties.headline;
-
-          L.marker([centerLat, centerLng], { icon: tornadoIcon })
-            .bindPopup(`<b>${headline}</b><br><a href='${mediaSearchUrl}' target='_blank'>Tornado Video Search</a>`)
-            .addTo(warningLayer);
+          const polygon = L.polygon(coords, {
+            color: 'yellow',
+            weight: 2,
+            dashArray: '5, 5',
+            fillColor: 'yellow',
+            fillOpacity: 0.2
+          });
+          polygon.bindPopup(`<b>${alert.properties.headline}</b><br><a href='https://www.youtube.com/results?search_query=${encodeURIComponent(alert.properties.areaDesc + ' tornado')}' target='_blank'>Tornado Video Search</a>`);
+          warningLayer.addLayer(polygon);
 
         } else if (event.toLowerCase().includes('hail')) {
-          const centerLat = coords.reduce((sum, pt) => sum + pt[0], 0) / coords.length;
-          const centerLng = coords.reduce((sum, pt) => sum + pt[1], 0) / coords.length;
-
           const headline = alert.properties.headline;
 
           L.marker([centerLat, centerLng], { icon: hailIcon })
-            .bindPopup(`<b>${headline}</b>`)
+            .bindPopup(`<b>${headline}</b>`) 
             .addTo(hailLayer);
         }
       });
