@@ -67,7 +67,7 @@ const map = L.map('map').setView([39.8283, -98.5795], 5); // Center of USA
       const response = await fetch('https://api.weather.gov/alerts/active');
       const data = await response.json();
 
-      data.features.forEach(async alert => {
+      for (const alert of data.features) {
         const event = alert.properties.event;
         const geometry = alert.geometry;
 
@@ -111,11 +111,12 @@ const map = L.map('map').setView([39.8283, -98.5795], 5); // Center of USA
           shape.addTo(warningLayer);
         } else {
           const marker = L.circleMarker([centerLat, centerLng], {
-            radius: 6,
-            color: 'blue',
-            fillColor: 'blue',
-            fillOpacity: 0.6
-          }).bindPopup(`<b>${headline}</b><br>${alert.properties.description || ''}`);
+  radius: 6,
+  color: 'blue',
+  fillColor: 'blue',
+  fillOpacity: 0.6
+}).bindPopup(`<b>${headline}</b><br>${alert.properties.description || ''}`);
+alertLayer.addLayer(marker);
           alertLayer.addLayer(marker);
         }
       });
