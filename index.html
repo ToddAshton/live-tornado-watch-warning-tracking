@@ -24,16 +24,10 @@
       'x-rapidapi-host': 'weather-api183.p.rapidapi.com',
       'x-rapidapi-key': 'ec63444091msh2bc2722bba30c4ep144d75jsn77fca8153508'
     }
-  } else {
-        const alertMarker = L.circleMarker([centerLat, centerLng], {
-          radius: 6,
-          color: 'blue',
-          fillColor: 'blue',
-          fillOpacity: 0.6
-        }).bindPopup(`<b>${headline}</b><br>${alert.properties.description || ''}`);
-        alertLayer.addLayer(alertMarker);
-      }
-    });
+  });
+  const data = await response.json();
+  return data.main || {};
+}
   const data = await response.json();
   return data.main || {};
 }
@@ -117,6 +111,14 @@ const map = L.map('map').setView([39.8283, -98.5795], 5); // Center of USA
             Temp: ${weather.temp_c || 'N/A'}&deg;C<br>Humidity: ${weather.humidity || 'N/A'}%<br>Pressure: ${weather.pressure_mb || 'N/A'} hPa<br>
             <a href='https://www.youtube.com/results?search_query=${encodeURIComponent(alert.properties.areaDesc + ' tornado')}' target='_blank'>Tornado Video Search</a>`);
           shape.addTo(warningLayer);
+        } else {
+          const marker = L.circleMarker([centerLat, centerLng], {
+            radius: 6,
+            color: 'blue',
+            fillColor: 'blue',
+            fillOpacity: 0.6
+          }).bindPopup(`<b>${headline}</b><br>${alert.properties.description || ''}`);
+          alertLayer.addLayer(marker);
         }
       });
     }
